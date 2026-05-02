@@ -12,6 +12,7 @@ import {
 } from "@/lib/training";
 
 const stages = [70, 75, 80, 85];
+const GOLD = "#D4AF37";
 
 function calculateWeight(max: number, percent: number) {
   return Math.round((max * percent) / 100);
@@ -37,6 +38,7 @@ export default function TrainingPage() {
   const nextStage = stages.find((stage) => !completedStages.includes(stage));
   const isCycleComplete = completedStages.length === stages.length;
   const challengeWeight = max + 5;
+  const progress = Math.round((completedStages.length / stages.length) * 100);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -139,67 +141,97 @@ export default function TrainingPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-4">
-        <p>読み込み中...</p>
+      <main className="min-h-screen flex items-center justify-center bg-[#101418] text-white">
+        <p className="text-sm text-gray-300">読み込み中...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4">
+    <main className="min-h-screen bg-[#101418] text-white px-4 py-5">
       <div className="mx-auto max-w-md space-y-4">
-        <h1 className="text-2xl font-bold text-center">Grab the Bar</h1>
+        <header className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              Grab the Bar
+            </h1>
+            <p className="mt-1 text-sm text-gray-400">
+              ベンチプレス100kg目標サポート
+            </p>
+          </div>
 
-        <button
-          onClick={handleLogout}
-          className="text-sm text-gray-500 underline block mx-auto"
-        >
-          ログアウト
-        </button>
+          <button
+            onClick={handleLogout}
+            className="rounded-full border border-[#2A3036] px-3 py-1 text-xs text-gray-300"
+          >
+            ログアウト
+          </button>
+        </header>
 
-        <p className="text-center text-sm text-gray-600">
-          ベンチプレス100kg達成支援アプリ
-        </p>
+        <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#2A3036]">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-lg">現在のMAX</h2>
+            <div className="text-xs text-gray-400">{progress}% 完了</div>
+          </div>
 
-        <section className="bg-white rounded-xl p-4 shadow">
-          <h2 className="font-bold mb-3">現在のMAX</h2>
-
-          <div className="flex gap-2">
+          <div className="mt-3 flex gap-2">
             <input
               type="number"
               value={inputMax}
               onChange={(e) => setInputMax(e.target.value)}
-              className="border p-2 w-full rounded"
+              className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-lg font-bold text-white outline-none focus:border-[#D4AF37]"
               placeholder="MAX重量"
             />
             <button
               onClick={registerMax}
-              className="bg-black text-white px-4 rounded"
+              className="rounded-lg bg-[#D4AF37] px-5 font-bold text-black shadow-[0_0_16px_rgba(212,175,55,0.35)] active:scale-95"
             >
               登録
             </button>
           </div>
 
-          <p className="mt-3 text-lg font-bold">{max}kg</p>
-          <p className="text-sm text-gray-600">
-            目標まであと {Math.max(100 - max, 0)}kg
-          </p>
+          <div className="mt-4 flex items-end justify-between">
+            <div>
+              <p className="text-2xl font-extrabold text-[#D4AF37]">
+                {max}kg
+              </p>
+              <p className="mt-1 text-sm text-gray-400">
+                目標まであと {Math.max(100 - max, 0)}kg
+              </p>
+            </div>
+
+            <div className="relative h-14 w-14">
+              <div className="absolute inset-0 rounded-full border-4 border-[#30363D]" />
+              <div
+                className="absolute inset-0 rounded-full border-4 border-[#D4AF37]"
+                style={{
+                  clipPath:
+                    progress >= 75
+                      ? "inset(0 0 0 0)"
+                      : progress >= 50
+                      ? "inset(0 0 0 25%)"
+                      : progress >= 25
+                      ? "inset(0 50% 0 0)"
+                      : "inset(0 75% 0 0)",
+                }}
+              />
+            </div>
+          </div>
         </section>
 
-        <section className="bg-white rounded-xl p-4 shadow">
-          <h2 className="font-bold mb-3">メニュー</h2>
+        <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#2A3036]">
+          <h2 className="font-bold text-lg">メニュー</h2>
 
-          <div className="mb-4">
-            <label className="block text-sm font-bold mb-1">完了日</label>
+          <div className="mt-3">
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="border p-2 w-full rounded"
+              className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-sm text-white outline-none focus:border-[#D4AF37]"
             />
           </div>
 
-          <div className="space-y-3">
+          <div className="mt-4 space-y-3">
             {stages.map((stage) => {
               const weight = calculateWeight(max, stage);
               const completed = completedStages.includes(stage);
@@ -208,33 +240,53 @@ export default function TrainingPage() {
               return (
                 <div
                   key={stage}
-                  className={`border rounded-lg p-3 ${
+                  className={`rounded-xl border p-3 transition ${
                     completed
-                      ? "bg-gray-200"
+                      ? "border-[#D4AF37] bg-[#D4AF37] text-black shadow-[0_0_16px_rgba(212,175,55,0.35)]"
                       : active
-                      ? "bg-white"
-                      : "bg-gray-50"
+                      ? "border-[#D4AF37] bg-[#151A20]"
+                      : "border-[#30363D] bg-[#151A20] opacity-75"
                   }`}
                 >
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-bold">
-                        {stage}%：{weight}kg
-                      </p>
-                      <p className="text-sm text-gray-600">10回 × 3セット</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-full border-4 ${
+                          completed
+                            ? "border-black"
+                            : active
+                            ? "border-[#D4AF37]"
+                            : "border-[#3A414A]"
+                        }`}
+                      >
+                        {completed ? "✓" : ""}
+                      </div>
+
+                      <div>
+                        <p className="font-extrabold">
+                          {stage}%：{weight}kg
+                        </p>
+                        <p
+                          className={`text-xs ${
+                            completed ? "text-black/70" : "text-gray-400"
+                          }`}
+                        >
+                          10回 × 3セット
+                        </p>
+                      </div>
                     </div>
 
                     {completed ? (
-                      <span className="text-sm font-bold">完了</span>
+                      <span className="text-sm font-extrabold">完了</span>
                     ) : active ? (
                       <button
                         onClick={() => completeStage(stage)}
-                        className="bg-black text-white px-3 py-2 rounded text-sm"
+                        className="rounded-lg bg-[#D4AF37] px-4 py-2 text-sm font-bold text-black active:scale-95"
                       >
                         完了
                       </button>
                     ) : (
-                      <span className="text-sm text-gray-400">未到達</span>
+                      <span className="text-xs text-gray-400">未</span>
                     )}
                   </div>
                 </div>
@@ -244,44 +296,52 @@ export default function TrainingPage() {
         </section>
 
         {isCycleComplete && (
-          <section className="bg-white rounded-xl p-4 shadow border-2 border-black">
-            <h2 className="font-bold mb-2">MAXチャレンジ</h2>
-            <p className="text-sm text-gray-600 mb-3">
+          <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#D4AF37]">
+            <h2 className="font-bold text-lg text-[#D4AF37]">
+              MAXチャレンジ
+            </h2>
+            <p className="mt-2 text-sm text-gray-400">
               70%〜85%を完了しました。次はMAX + 5kgに挑戦します。
             </p>
 
-            <p className="text-2xl font-bold mb-3">{challengeWeight}kg</p>
+            <p className="mt-4 text-4xl font-extrabold text-[#D4AF37]">
+              {challengeWeight}kg
+            </p>
 
-            <div className="mb-4">
-              <label className="block text-sm font-bold mb-1">
-                MAXチャレンジ日
-              </label>
+            <div className="mt-4">
               <input
                 type="date"
                 value={challengeDate}
                 onChange={(e) => setChallengeDate(e.target.value)}
-                className="border p-2 w-full rounded"
+                className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-sm text-white outline-none focus:border-[#D4AF37]"
               />
             </div>
 
             <button
               onClick={completeMaxChallenge}
-              className="bg-black text-white w-full py-3 rounded"
+              className="mt-4 w-full rounded-xl bg-[#D4AF37] py-3 font-extrabold text-black shadow-[0_0_16px_rgba(212,175,55,0.35)] active:scale-95"
             >
               MAXチャレンジ成功
             </button>
           </section>
         )}
 
-        <section className="bg-white rounded-xl p-4 shadow">
-          <h2 className="font-bold mb-3">履歴</h2>
+        <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#2A3036]">
+          <h2 className="font-bold text-lg">履歴</h2>
 
           {logs.length === 0 ? (
-            <p className="text-sm text-gray-500">まだ履歴はありません</p>
+            <div className="mt-4 rounded-xl bg-[#151A20] p-4 text-sm text-gray-400">
+              まだ記録がありません。
+              <br />
+              トレーニングを記録して、履歴を作成しましょう。
+            </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="mt-4 space-y-2">
               {logs.map((log, index) => (
-                <li key={index} className="text-sm border-b pb-2">
+                <li
+                  key={index}
+                  className="rounded-lg border border-[#30363D] bg-[#151A20] p-3 text-sm text-gray-200"
+                >
                   {log}
                 </li>
               ))}
