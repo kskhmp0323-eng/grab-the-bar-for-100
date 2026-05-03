@@ -117,7 +117,10 @@ export default function TrainingPage() {
     if (!newMax || newMax <= 0) return;
 
     const nextCompletedStages: CompletedStage[] = [];
-    const nextLogs = [`${formatDate(selectedDate)}：MAX ${newMax}kg を登録`, ...logs];
+    const nextLogs = [
+      `${formatDate(selectedDate)}：MAX ${newMax}kg を登録`,
+      ...logs,
+    ];
 
     setMax(newMax);
     setInputMax(String(newMax));
@@ -177,6 +180,28 @@ export default function TrainingPage() {
     await saveData(max, inputMax, nextCompletedStages, nextLogs);
   };
 
+  const resetAll = async () => {
+    const ok = window.confirm(
+      "すべての記録を初期化します。最初のMAX登録からやり直しますか？"
+    );
+
+    if (!ok) return;
+
+    const nextMax = 0;
+    const nextInputMax = "";
+    const nextCompletedStages: CompletedStage[] = [];
+    const nextLogs: string[] = [];
+
+    setMax(nextMax);
+    setInputMax(nextInputMax);
+    setCompletedStages(nextCompletedStages);
+    setLogs(nextLogs);
+    setSelectedDate(getToday());
+    setChallengeDate(getToday());
+
+    await saveData(nextMax, nextInputMax, nextCompletedStages, nextLogs);
+  };
+
   const handleLogout = async () => {
     await logout();
     router.push("/login");
@@ -214,7 +239,9 @@ export default function TrainingPage() {
         <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#2A3036]">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-lg">現在のMAX</h2>
-            {hasMax && <div className="text-xs text-gray-400">{progress}% 完了</div>}
+            {hasMax && (
+              <div className="text-xs text-gray-400">{progress}% 完了</div>
+            )}
           </div>
 
           {!hasMax ? (
@@ -256,6 +283,15 @@ export default function TrainingPage() {
                 </span>
               </div>
             </div>
+          )}
+
+          {hasMax && (
+            <button
+              onClick={resetAll}
+              className="mt-4 w-full rounded-xl border border-red-400/40 py-2 text-sm font-bold text-red-300"
+            >
+              初期化してMAX登録からやり直す
+            </button>
           )}
         </section>
 
@@ -340,12 +376,17 @@ export default function TrainingPage() {
                           <p className="text-sm font-extrabold">完了</p>
                         </div>
                       ) : active ? (
-                        <button
-                          onClick={() => completeStage(stage)}
-                          className="rounded-lg bg-[#D4AF37] px-4 py-2 text-sm font-bold text-black active:scale-95"
-                        >
-                          完了
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-gray-300">
+                            {formatDate(selectedDate)}
+                          </span>
+                          <button
+                            onClick={() => completeStage(stage)}
+                            className="rounded-lg bg-[#D4AF37] px-4 py-2 text-sm font-bold text-black active:scale-95"
+                          >
+                            完了
+                          </button>
+                        </div>
                       ) : (
                         <span className="text-xs text-gray-400">未</span>
                       )}
