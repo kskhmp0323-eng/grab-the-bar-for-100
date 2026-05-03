@@ -14,6 +14,12 @@ import {
 
 const stages = [70, 75, 80, 85];
 
+type ChartRow = {
+  date: string;
+  maxWeight: number;
+  menuWeight: number;
+};
+
 function calculateWeight(max: number, percent: number) {
   return Math.round((max * percent) / 100);
 }
@@ -46,6 +52,51 @@ function normalizeCompletedStages(raw: unknown): CompletedStage[] {
   });
 }
 
+function buildChartRows(logs: string[]): ChartRow[] {
+  const map = new Map<string, ChartRow>();
+
+  logs.forEach((log) => {
+    const date = log.split("：")[0];
+
+    const trainingMatch = log.match(/MAX (\d+)kg \/ \d+% \/ (\d+)kg 完了/);
+    const challengeMatch = log.match(/MAXチャレンジ成功 (\d+)kg/);
+    const maxRegisterMatch = log.match(/MAX (\d+)kg を登録/);
+
+    if (!map.has(date)) {
+      map.set(date, {
+        date,
+        maxWeight: 0,
+        menuWeight: 0,
+      });
+    }
+
+    const row = map.get(date);
+    if (!row) return;
+
+    if (trainingMatch) {
+      const maxWeight = Number(trainingMatch[1]);
+      const menuWeight = Number(trainingMatch[2]);
+
+      row.maxWeight = Math.max(row.maxWeight, maxWeight);
+      row.menuWeight = Math.max(row.menuWeight, menuWeight);
+    }
+
+    if (challengeMatch) {
+      const maxWeight = Number(challengeMatch[1]);
+      row.maxWeight = Math.max(row.maxWeight, maxWeight);
+    }
+
+    if (maxRegisterMatch) {
+      const maxWeight = Number(maxRegisterMatch[1]);
+      row.maxWeight = Math.max(row.maxWeight, maxWeight);
+    }
+  });
+
+  return Array.from(map.values())
+    .filter((row) => row.maxWeight > 0 || row.menuWeight > 0)
+    .reverse();
+}
+
 export default function TrainingPage() {
   const router = useRouter();
 
@@ -68,6 +119,13 @@ export default function TrainingPage() {
   const isCycleComplete = hasMax && completedStages.length === stages.length;
   const challengeWeight = max + 5;
   const progress = Math.round((completedStages.length / stages.length) * 100);
+
+  const chartRows = buildChartRows(logs);
+  const maxChartValue = Math.max(
+    100,
+    ...chartRows.map((row) => row.maxWeight),
+    ...chartRows.map((row) => row.menuWeight)
+  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -117,7 +175,10 @@ export default function TrainingPage() {
     if (!newMax || newMax <= 0) return;
 
     const nextCompletedStages: CompletedStage[] = [];
-    const nextLogs = [`${formatDate(selectedDate)}：MAX ${newMax}kg を登録`, ...logs];
+    const nextLogs = [
+      `${formatDate(selectedDate)}：MAX ${newMax}kg を登録`,
+      ...logs,
+    ];
 
     setMax(newMax);
     setInputMax(String(newMax));
@@ -187,10 +248,7 @@ export default function TrainingPage() {
     const nextMax = 0;
     const nextInputMax = "";
     const nextCompletedStages: CompletedStage[] = [];
-    const nextLogs = [
-      `${formatDate(getToday())}：進行状況を初期化`,
-      ...logs,
-    ];
+    const nextLogs = [`${formatDate(getToday())}：進行状況を初期化`, ...logs];
 
     setMax(nextMax);
     setInputMax(nextInputMax);
@@ -422,6 +480,73 @@ export default function TrainingPage() {
             </button>
           </section>
         )}
+
+        <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#2A3036]">
+          <h2 className="font-bold text-lg">カレンダー / 重量推移</h2>
+
+          {chartRows.length === 0 ? (
+            <div className="mt-4 rounded-xl bg-[#151A20] p-4 text-sm text-gray-400">
+              まだ表示できる記録がありません。
+            </div>
+          ) : (
+            <div className="mt-4 space-y-4">
+              <div className="flex gap-4 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-sm bg-[#D4AF37]" />
+                  <span className="text-gray-300">MAX重量</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-sm bg-[#C8B27A]" />
+                  <span className="text-gray-300">メニュー重量</span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {chartRows.map((row) => (
+                  <div key={row.date} className="space-y-1">
+                    <div className="text-xs text-gray-400">{row.date}</div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 text-right text-xs text-gray-400">
+                          {row.maxWeight}kg
+                        </div>
+                        <div className="h-4 flex-1 rounded bg-[#11161B]">
+                          <div
+                            className="h-4 rounded bg-[#D4AF37]"
+                            style={{
+                              width: `${Math.max(
+                                (row.maxWeight / maxChartValue) * 100,
+                                3
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 text-right text-xs text-gray-400">
+                          {row.menuWeight}kg
+                        </div>
+                        <div className="h-4 flex-1 rounded bg-[#11161B]">
+                          <div
+                            className="h-4 rounded bg-[#C8B27A]"
+                            style={{
+                              width: `${Math.max(
+                                (row.menuWeight / maxChartValue) * 100,
+                                row.menuWeight > 0 ? 3 : 0
+                              )}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
 
         <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#2A3036]">
           <h2 className="font-bold text-lg">履歴</h2>
