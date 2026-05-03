@@ -1,10 +1,15 @@
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
+export type CompletedStage = {
+  stage: number;
+  date: string;
+};
+
 export type TrainingData = {
   max: number;
   inputMax: string;
-  completedStages: number[];
+  completedStages: CompletedStage[];
   logs: string[];
   updatedAt: string;
 };
