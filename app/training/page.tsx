@@ -74,21 +74,16 @@ function buildChartRows(logs: string[]): ChartRow[] {
     if (!row) return;
 
     if (trainingMatch) {
-      const maxWeight = Number(trainingMatch[1]);
-      const menuWeight = Number(trainingMatch[2]);
-
-      row.maxWeight = Math.max(row.maxWeight, maxWeight);
-      row.menuWeight = Math.max(row.menuWeight, menuWeight);
+      row.maxWeight = Math.max(row.maxWeight, Number(trainingMatch[1]));
+      row.menuWeight = Math.max(row.menuWeight, Number(trainingMatch[2]));
     }
 
     if (challengeMatch) {
-      const maxWeight = Number(challengeMatch[1]);
-      row.maxWeight = Math.max(row.maxWeight, maxWeight);
+      row.maxWeight = Math.max(row.maxWeight, Number(challengeMatch[1]));
     }
 
     if (maxRegisterMatch) {
-      const maxWeight = Number(maxRegisterMatch[1]);
-      row.maxWeight = Math.max(row.maxWeight, maxWeight);
+      row.maxWeight = Math.max(row.maxWeight, Number(maxRegisterMatch[1]));
     }
   });
 
@@ -482,67 +477,143 @@ export default function TrainingPage() {
         )}
 
         <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#2A3036]">
-          <h2 className="font-bold text-lg">カレンダー / 重量推移</h2>
+          <h2 className="font-bold text-lg">重量推移グラフ</h2>
+          <p className="mt-1 text-xs text-gray-400">
+            日付ごとのMAX重量とメニュー重量
+          </p>
 
           {chartRows.length === 0 ? (
             <div className="mt-4 rounded-xl bg-[#151A20] p-4 text-sm text-gray-400">
               まだ表示できる記録がありません。
             </div>
           ) : (
-            <div className="mt-4 space-y-4">
-              <div className="flex gap-4 text-xs">
+            <div className="mt-5">
+              <div className="mb-4 flex gap-4 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-sm bg-[#D4AF37]" />
+                  <span className="h-3 w-3 rounded-full bg-[#D4AF37]" />
                   <span className="text-gray-300">MAX重量</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-sm bg-[#C8B27A]" />
+                  <span className="h-3 w-3 rounded-full bg-[#C8B27A]" />
                   <span className="text-gray-300">メニュー重量</span>
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {chartRows.map((row) => (
-                  <div key={row.date} className="space-y-1">
-                    <div className="text-xs text-gray-400">{row.date}</div>
+              <div className="overflow-x-auto pb-3">
+                <svg
+                  width={Math.max(chartRows.length * 78, 320)}
+                  height="240"
+                  viewBox={`0 0 ${Math.max(chartRows.length * 78, 320)} 240`}
+                  className="rounded-xl bg-[#151A20]"
+                >
+                  {[0, 25, 50, 75, 100].map((value) => {
+                    const y = 190 - (value / maxChartValue) * 160;
+                    return (
+                      <g key={value}>
+                        <line
+                          x1="34"
+                          y1={y}
+                          x2={Math.max(chartRows.length * 78, 320) - 16}
+                          y2={y}
+                          stroke="#2A3036"
+                          strokeWidth="1"
+                        />
+                        <text
+                          x="8"
+                          y={y + 4}
+                          fill="#9CA3AF"
+                          fontSize="10"
+                        >
+                          {value}
+                        </text>
+                      </g>
+                    );
+                  })}
 
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 text-right text-xs text-gray-400">
-                          {row.maxWeight}kg
-                        </div>
-                        <div className="h-4 flex-1 rounded bg-[#11161B]">
-                          <div
-                            className="h-4 rounded bg-[#D4AF37]"
-                            style={{
-                              width: `${Math.max(
-                                (row.maxWeight / maxChartValue) * 100,
-                                3
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
+                  <polyline
+                    fill="none"
+                    stroke="#D4AF37"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={chartRows
+                      .map((row, index) => {
+                        const x = 48 + index * 78;
+                        const y = 190 - (row.maxWeight / maxChartValue) * 160;
+                        return `${x},${y}`;
+                      })
+                      .join(" ")}
+                  />
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 text-right text-xs text-gray-400">
-                          {row.menuWeight}kg
-                        </div>
-                        <div className="h-4 flex-1 rounded bg-[#11161B]">
-                          <div
-                            className="h-4 rounded bg-[#C8B27A]"
-                            style={{
-                              width: `${Math.max(
-                                (row.menuWeight / maxChartValue) * 100,
-                                row.menuWeight > 0 ? 3 : 0
-                              )}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  <polyline
+                    fill="none"
+                    stroke="#C8B27A"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    points={chartRows
+                      .filter((row) => row.menuWeight > 0)
+                      .map((row) => {
+                        const index = chartRows.indexOf(row);
+                        const x = 48 + index * 78;
+                        const y =
+                          190 - (row.menuWeight / maxChartValue) * 160;
+                        return `${x},${y}`;
+                      })
+                      .join(" ")}
+                  />
+
+                  {chartRows.map((row, index) => {
+                    const x = 48 + index * 78;
+                    const maxY = 190 - (row.maxWeight / maxChartValue) * 160;
+                    const menuY =
+                      row.menuWeight > 0
+                        ? 190 - (row.menuWeight / maxChartValue) * 160
+                        : null;
+
+                    return (
+                      <g key={row.date}>
+                        <circle cx={x} cy={maxY} r="4" fill="#D4AF37" />
+                        <text
+                          x={x}
+                          y={maxY - 8}
+                          textAnchor="middle"
+                          fill="#D4AF37"
+                          fontSize="10"
+                          fontWeight="bold"
+                        >
+                          {row.maxWeight}
+                        </text>
+
+                        {menuY && (
+                          <>
+                            <circle cx={x} cy={menuY} r="4" fill="#C8B27A" />
+                            <text
+                              x={x}
+                              y={menuY - 8}
+                              textAnchor="middle"
+                              fill="#C8B27A"
+                              fontSize="10"
+                              fontWeight="bold"
+                            >
+                              {row.menuWeight}
+                            </text>
+                          </>
+                        )}
+
+                        <text
+                          x={x}
+                          y="218"
+                          textAnchor="middle"
+                          fill="#9CA3AF"
+                          fontSize="10"
+                        >
+                          {row.date.replace("2026/", "")}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
               </div>
             </div>
           )}
