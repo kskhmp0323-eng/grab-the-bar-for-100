@@ -117,10 +117,7 @@ export default function TrainingPage() {
     if (!newMax || newMax <= 0) return;
 
     const nextCompletedStages: CompletedStage[] = [];
-    const nextLogs = [
-      `${formatDate(selectedDate)}：MAX ${newMax}kg を登録`,
-      ...logs,
-    ];
+    const nextLogs = [`${formatDate(selectedDate)}：MAX ${newMax}kg を登録`, ...logs];
 
     setMax(newMax);
     setInputMax(String(newMax));
@@ -182,7 +179,7 @@ export default function TrainingPage() {
 
   const resetAll = async () => {
     const ok = window.confirm(
-      "すべての記録を初期化します。最初のMAX登録からやり直しますか？"
+      "現在の進行状況を初期化します。過去の履歴は残したまま、最初のMAX登録からやり直しますか？"
     );
 
     if (!ok) return;
@@ -190,7 +187,10 @@ export default function TrainingPage() {
     const nextMax = 0;
     const nextInputMax = "";
     const nextCompletedStages: CompletedStage[] = [];
-    const nextLogs: string[] = [];
+    const nextLogs = [
+      `${formatDate(getToday())}：進行状況を初期化`,
+      ...logs,
+    ];
 
     setMax(nextMax);
     setInputMax(nextInputMax);
@@ -310,15 +310,6 @@ export default function TrainingPage() {
               )}
             </div>
 
-            <div className="mt-3">
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-sm text-white outline-none focus:border-[#D4AF37]"
-              />
-            </div>
-
             <div className="mt-4 space-y-3">
               {stages.map((stage) => {
                 const weight = calculateWeight(max, stage);
@@ -377,9 +368,12 @@ export default function TrainingPage() {
                         </div>
                       ) : active ? (
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-gray-300">
-                            {formatDate(selectedDate)}
-                          </span>
+                          <input
+                            type="date"
+                            value={selectedDate}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="w-[118px] rounded-lg border border-[#343B44] bg-[#11161B] px-2 py-2 text-xs text-white outline-none focus:border-[#D4AF37]"
+                          />
                           <button
                             onClick={() => completeStage(stage)}
                             className="rounded-lg bg-[#D4AF37] px-4 py-2 text-sm font-bold text-black active:scale-95"
