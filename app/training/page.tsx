@@ -14,8 +14,8 @@ import {
 } from "@/lib/training";
 
 const stages = [70, 75, 80, 85];
-const BRAND_GOLD = "#B8B083";
-const BRAND_GOLD_DARK = "#A59D72";
+const BRAND_GOLD = "#D4AF37";
+const BRAND_GOLD_DARK = "#C8B27A";
 
 type ChartRow = {
   date: string;
@@ -272,7 +272,7 @@ export default function TrainingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#101418] text-white px-4 py-5 pb-24">
+    <main className="min-h-screen bg-[#101418] text-white px-4 py-5 pb-24 overflow-x-hidden">
       <div className="mx-auto max-w-md space-y-4">
         <header className="flex items-start justify-between">
           <div>
@@ -287,7 +287,7 @@ export default function TrainingPage() {
 
           <button
             onClick={handleLogout}
-            className="rounded-full border border-[#2A3036] px-3 py-1 text-xs text-gray-300"
+            className="shrink-0 rounded-full border border-[#2A3036] px-3 py-1 text-xs text-gray-300"
           >
             ログアウト
           </button>
@@ -312,16 +312,15 @@ export default function TrainingPage() {
                   type="number"
                   value={inputMax}
                   onChange={(e) => setInputMax(e.target.value)}
-                  className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-lg font-bold text-white outline-none"
-                  style={{ borderColor: undefined }}
+                  className="w-full min-w-0 rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-lg font-bold text-white outline-none"
                   placeholder="例：80"
                 />
                 <button
                   onClick={registerMax}
-                  className="rounded-lg px-5 font-bold text-black active:scale-95"
+                  className="shrink-0 rounded-lg px-5 font-bold text-black active:scale-95"
                   style={{
                     backgroundColor: BRAND_GOLD,
-                    boxShadow: "0 0 16px rgba(184,176,131,0.35)",
+                    boxShadow: "0 0 16px rgba(212,175,55,0.35)",
                   }}
                 >
                   登録
@@ -401,14 +400,14 @@ export default function TrainingPage() {
                       borderColor:
                         completed || active ? BRAND_GOLD : undefined,
                       boxShadow: completed
-                        ? "0 0 16px rgba(184,176,131,0.35)"
+                        ? "0 0 16px rgba(212,175,55,0.35)"
                         : undefined,
                     }}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <div
-                          className={`flex h-8 w-8 items-center justify-center rounded-full border-4 ${
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-4 ${
                             completed
                               ? "border-black"
                               : active
@@ -423,7 +422,7 @@ export default function TrainingPage() {
                           {completed ? "✓" : ""}
                         </div>
 
-                        <div>
+                        <div className="min-w-0">
                           <p className="font-extrabold">
                             {stage}%：{weight}kg
                           </p>
@@ -438,7 +437,7 @@ export default function TrainingPage() {
                       </div>
 
                       {completed ? (
-                        <div className="text-right">
+                        <div className="shrink-0 text-right">
                           {completed.date && (
                             <p className="text-xs font-bold text-black/70">
                               {formatDate(completed.date)}
@@ -447,7 +446,7 @@ export default function TrainingPage() {
                           <p className="text-sm font-extrabold">完了</p>
                         </div>
                       ) : active ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex shrink-0 items-center gap-2">
                           <input
                             type="date"
                             value={selectedDate}
@@ -463,7 +462,7 @@ export default function TrainingPage() {
                           </button>
                         </div>
                       ) : (
-                        <span className="text-xs text-gray-400">未</span>
+                        <span className="shrink-0 text-xs text-gray-400">未</span>
                       )}
                     </div>
                   </div>
@@ -475,7 +474,7 @@ export default function TrainingPage() {
 
         {isCycleComplete && (
           <section
-            className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border"
+            className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border overflow-hidden"
             style={{ borderColor: BRAND_GOLD }}
           >
             <h2 className="font-bold text-lg" style={{ color: BRAND_GOLD }}>
@@ -492,12 +491,12 @@ export default function TrainingPage() {
               {challengeWeight}kg
             </p>
 
-            <div className="mt-4">
+            <div className="mt-4 w-full overflow-hidden">
               <input
                 type="date"
                 value={challengeDate}
                 onChange={(e) => setChallengeDate(e.target.value)}
-                className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-sm text-white outline-none"
+                className="block w-full min-w-0 max-w-full box-border rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-sm text-white outline-none"
               />
             </div>
 
@@ -506,7 +505,7 @@ export default function TrainingPage() {
               className="mt-4 w-full rounded-xl py-3 font-extrabold text-black active:scale-95"
               style={{
                 backgroundColor: BRAND_GOLD,
-                boxShadow: "0 0 16px rgba(184,176,131,0.35)",
+                boxShadow: "0 0 16px rgba(212,175,55,0.35)",
               }}
             >
               MAXチャレンジ成功
