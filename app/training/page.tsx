@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
@@ -13,6 +14,8 @@ import {
 } from "@/lib/training";
 
 const stages = [70, 75, 80, 85];
+const BRAND_GOLD = "#B8B083";
+const BRAND_GOLD_DARK = "#A59D72";
 
 type ChartRow = {
   date: string;
@@ -269,12 +272,13 @@ export default function TrainingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#101418] text-white px-4 py-5">
+    <main className="min-h-screen bg-[#101418] text-white px-4 py-5 pb-24">
       <div className="mx-auto max-w-md space-y-4">
         <header className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">
-              Grab the Bar
+            <h1 className="text-3xl font-extrabold tracking-tight leading-tight">
+              Grab the Bar{" "}
+              <span style={{ color: BRAND_GOLD }}>for 100</span>
             </h1>
             <p className="mt-1 text-sm text-gray-400">
               ベンチプレス100kg目標サポート
@@ -308,12 +312,17 @@ export default function TrainingPage() {
                   type="number"
                   value={inputMax}
                   onChange={(e) => setInputMax(e.target.value)}
-                  className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-lg font-bold text-white outline-none focus:border-[#D4AF37]"
+                  className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-lg font-bold text-white outline-none"
+                  style={{ borderColor: undefined }}
                   placeholder="例：80"
                 />
                 <button
                   onClick={registerMax}
-                  className="rounded-lg bg-[#D4AF37] px-5 font-bold text-black shadow-[0_0_16px_rgba(212,175,55,0.35)] active:scale-95"
+                  className="rounded-lg px-5 font-bold text-black active:scale-95"
+                  style={{
+                    backgroundColor: BRAND_GOLD,
+                    boxShadow: "0 0 16px rgba(184,176,131,0.35)",
+                  }}
                 >
                   登録
                 </button>
@@ -322,7 +331,10 @@ export default function TrainingPage() {
           ) : (
             <div className="mt-4 flex items-end justify-between">
               <div>
-                <p className="text-3xl font-extrabold text-[#D4AF37]">
+                <p
+                  className="text-3xl font-extrabold"
+                  style={{ color: BRAND_GOLD }}
+                >
                   {max}kg
                 </p>
                 <p className="mt-1 text-sm text-gray-400">
@@ -331,7 +343,10 @@ export default function TrainingPage() {
               </div>
 
               <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[#30363D]">
-                <span className="text-sm font-bold text-[#D4AF37]">
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: BRAND_GOLD }}
+                >
                   {progress}%
                 </span>
               </div>
@@ -376,11 +391,19 @@ export default function TrainingPage() {
                     key={stage}
                     className={`rounded-xl border p-3 transition ${
                       completed
-                        ? "border-[#D4AF37] bg-[#D4AF37] text-black shadow-[0_0_16px_rgba(212,175,55,0.35)]"
+                        ? "text-black"
                         : active
-                        ? "border-[#D4AF37] bg-[#151A20]"
+                        ? "bg-[#151A20]"
                         : "border-[#30363D] bg-[#151A20] opacity-75"
                     }`}
+                    style={{
+                      backgroundColor: completed ? BRAND_GOLD : undefined,
+                      borderColor:
+                        completed || active ? BRAND_GOLD : undefined,
+                      boxShadow: completed
+                        ? "0 0 16px rgba(184,176,131,0.35)"
+                        : undefined,
+                    }}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
@@ -389,9 +412,13 @@ export default function TrainingPage() {
                             completed
                               ? "border-black"
                               : active
-                              ? "border-[#D4AF37]"
+                              ? ""
                               : "border-[#3A414A]"
                           }`}
+                          style={{
+                            borderColor:
+                              active && !completed ? BRAND_GOLD : undefined,
+                          }}
                         >
                           {completed ? "✓" : ""}
                         </div>
@@ -425,11 +452,12 @@ export default function TrainingPage() {
                             type="date"
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
-                            className="w-[118px] rounded-lg border border-[#343B44] bg-[#11161B] px-2 py-2 text-xs text-white outline-none focus:border-[#D4AF37]"
+                            className="w-[118px] rounded-lg border border-[#343B44] bg-[#11161B] px-2 py-2 text-xs text-white outline-none"
                           />
                           <button
                             onClick={() => completeStage(stage)}
-                            className="rounded-lg bg-[#D4AF37] px-4 py-2 text-sm font-bold text-black active:scale-95"
+                            className="rounded-lg px-4 py-2 text-sm font-bold text-black active:scale-95"
+                            style={{ backgroundColor: BRAND_GOLD }}
                           >
                             完了
                           </button>
@@ -446,15 +474,21 @@ export default function TrainingPage() {
         )}
 
         {isCycleComplete && (
-          <section className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border border-[#D4AF37]">
-            <h2 className="font-bold text-lg text-[#D4AF37]">
+          <section
+            className="rounded-2xl bg-[#1B2026] p-4 shadow-xl border"
+            style={{ borderColor: BRAND_GOLD }}
+          >
+            <h2 className="font-bold text-lg" style={{ color: BRAND_GOLD }}>
               MAXチャレンジ
             </h2>
             <p className="mt-2 text-sm text-gray-400">
               70%〜85%を完了しました。次はMAX + 5kgに挑戦します。
             </p>
 
-            <p className="mt-4 text-4xl font-extrabold text-[#D4AF37]">
+            <p
+              className="mt-4 text-4xl font-extrabold"
+              style={{ color: BRAND_GOLD }}
+            >
               {challengeWeight}kg
             </p>
 
@@ -463,13 +497,17 @@ export default function TrainingPage() {
                 type="date"
                 value={challengeDate}
                 onChange={(e) => setChallengeDate(e.target.value)}
-                className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-sm text-white outline-none focus:border-[#D4AF37]"
+                className="w-full rounded-lg border border-[#343B44] bg-[#11161B] p-3 text-sm text-white outline-none"
               />
             </div>
 
             <button
               onClick={completeMaxChallenge}
-              className="mt-4 w-full rounded-xl bg-[#D4AF37] py-3 font-extrabold text-black shadow-[0_0_16px_rgba(212,175,55,0.35)] active:scale-95"
+              className="mt-4 w-full rounded-xl py-3 font-extrabold text-black active:scale-95"
+              style={{
+                backgroundColor: BRAND_GOLD,
+                boxShadow: "0 0 16px rgba(184,176,131,0.35)",
+              }}
             >
               MAXチャレンジ成功
             </button>
@@ -490,11 +528,17 @@ export default function TrainingPage() {
             <div className="mt-5">
               <div className="mb-4 flex gap-4 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-[#D4AF37]" />
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: BRAND_GOLD }}
+                  />
                   <span className="text-gray-300">MAX重量</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-[#C8B27A]" />
+                  <span
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: BRAND_GOLD_DARK }}
+                  />
                   <span className="text-gray-300">メニュー重量</span>
                 </div>
               </div>
@@ -518,12 +562,7 @@ export default function TrainingPage() {
                           stroke="#2A3036"
                           strokeWidth="1"
                         />
-                        <text
-                          x="8"
-                          y={y + 4}
-                          fill="#9CA3AF"
-                          fontSize="10"
-                        >
+                        <text x="8" y={y + 4} fill="#9CA3AF" fontSize="10">
                           {value}
                         </text>
                       </g>
@@ -532,7 +571,7 @@ export default function TrainingPage() {
 
                   <polyline
                     fill="none"
-                    stroke="#D4AF37"
+                    stroke={BRAND_GOLD}
                     strokeWidth="3"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -547,7 +586,7 @@ export default function TrainingPage() {
 
                   <polyline
                     fill="none"
-                    stroke="#C8B27A"
+                    stroke={BRAND_GOLD_DARK}
                     strokeWidth="3"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -573,12 +612,12 @@ export default function TrainingPage() {
 
                     return (
                       <g key={row.date}>
-                        <circle cx={x} cy={maxY} r="4" fill="#D4AF37" />
+                        <circle cx={x} cy={maxY} r="4" fill={BRAND_GOLD} />
                         <text
                           x={x}
                           y={maxY - 8}
                           textAnchor="middle"
-                          fill="#D4AF37"
+                          fill={BRAND_GOLD}
                           fontSize="10"
                           fontWeight="bold"
                         >
@@ -587,12 +626,17 @@ export default function TrainingPage() {
 
                         {menuY && (
                           <>
-                            <circle cx={x} cy={menuY} r="4" fill="#C8B27A" />
+                            <circle
+                              cx={x}
+                              cy={menuY}
+                              r="4"
+                              fill={BRAND_GOLD_DARK}
+                            />
                             <text
                               x={x}
                               y={menuY - 8}
                               textAnchor="middle"
-                              fill="#C8B27A"
+                              fill={BRAND_GOLD_DARK}
                               fontSize="10"
                               fontWeight="bold"
                             >
@@ -642,6 +686,23 @@ export default function TrainingPage() {
           )}
         </section>
       </div>
+
+      <nav className="fixed bottom-0 left-0 right-0 border-t border-[#2A3036] bg-[#101418]/95 px-4 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-md justify-around text-xs">
+          <Link href="/training" className="font-bold" style={{ color: BRAND_GOLD }}>
+            ホーム
+          </Link>
+          <Link href="/calendar" className="text-gray-400">
+            カレンダー
+          </Link>
+          <Link href="/training" className="text-gray-400">
+            履歴
+          </Link>
+          <Link href="/training" className="text-gray-400">
+            設定
+          </Link>
+        </div>
+      </nav>
     </main>
   );
 }
