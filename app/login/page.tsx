@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signInWithEmail } from "@/lib/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 const BRAND_GOLD = "#D4AF37";
 
@@ -25,7 +26,7 @@ export default function LoginPage() {
 
     try {
       setSending(true);
-      await signInWithEmail(email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       router.push("/training");
     } catch {
       setError("ログインに失敗しました。メールアドレスとパスワードを確認してください。");
@@ -93,7 +94,11 @@ export default function LoginPage() {
 
           <div className="mt-5 text-center text-sm text-gray-400">
             アカウントをお持ちでない方は{" "}
-            <Link href="/signup" className="font-bold underline" style={{ color: BRAND_GOLD }}>
+            <Link
+              href="/signup"
+              className="font-bold underline"
+              style={{ color: BRAND_GOLD }}
+            >
               新規登録
             </Link>
           </div>
